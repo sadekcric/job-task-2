@@ -29,6 +29,16 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    const productCollection = client.db("SCIC-job-task-2").collection("products");
+
+    app.get("/products", async (req, res) => {
+      try {
+        const data = await productCollection.find().toArray();
+        res.status(200).send(data);
+      } catch (error) {
+        res.status(404).send(error.message);
+      }
+    });
   } finally {
   }
 }
