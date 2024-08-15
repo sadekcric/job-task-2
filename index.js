@@ -33,8 +33,36 @@ async function run() {
 
     app.get("/products", async (req, res) => {
       try {
-        const data = await productCollection.find().toArray();
-        res.status(200).send(data);
+        const pages = parseInt(req.query.pages);
+        const size = parseInt(req.query.size);
+
+        const productCount = await productCollection.estimatedDocumentCount();
+
+        const data = await productCollection
+          .find()
+          .skip(pages * size)
+          .limit(size)
+          .toArray();
+        res.status(200).send({ allProduct: data, allProductLength: productCount });
+      } catch (error) {
+        res.status(404).send(error.message);
+      }
+    });
+
+    app.get("/search", async (req, res) => {
+      const { query } = req.query;
+
+      if (!query) {
+        res.status(404).send({ message: "Search Query not Required" });
+      }
+
+      try {
+        const filter = {
+          ProductName: { $regex: query, $options: "i" },
+        };
+        const searchingData = await productCollection.find(filter).toArray();
+
+        res.status(200).send(searchingData);
       } catch (error) {
         res.status(404).send(error.message);
       }
