@@ -35,11 +35,20 @@ async function run() {
       try {
         const pages = parseInt(req.query.pages);
         const size = parseInt(req.query.size);
+        const { sortPrice, sortDate } = req.query;
+
+        const query = {};
+        const option = {
+          sort: {
+            Price: sortPrice === "asc" ? 1 : -1,
+            CreationDate: sortDate === "asc" ? 1 : -1,
+          },
+        };
 
         const productCount = await productCollection.estimatedDocumentCount();
 
         const data = await productCollection
-          .find()
+          .find(query, option)
           .skip(pages * size)
           .limit(size)
           .toArray();
@@ -66,6 +75,13 @@ async function run() {
       } catch (error) {
         res.status(404).send(error.message);
       }
+    });
+
+    app.get("/search-category", async (req, res) => {
+      const { category } = req.query;
+      const query = { Category: { $regex: category } };
+      const data = await productCollection.find(query).toArray();
+      res.status(200).send(data);
     });
   } finally {
   }
