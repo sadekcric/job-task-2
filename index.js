@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 
 // Mongodb database started
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.1ekltq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -87,6 +87,14 @@ async function run() {
 
       const data = await productCollection.find(query).toArray();
       res.status(200).send(data);
+    });
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const product = await productCollection.findOne(query);
+
+      res.status(200).send(product);
     });
   } finally {
   }
