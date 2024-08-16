@@ -79,8 +79,12 @@ async function run() {
     });
 
     app.get("/search-category", async (req, res) => {
-      const { category } = req.query;
-      const query = { Category: { $regex: category } };
+      const { category, min, max } = req.query;
+      const query = {
+        Category: { $regex: category, $options: "i" }, // Case-insensitive
+        Price: { $gt: parseInt(min), $lt: parseInt(max) },
+      };
+
       const data = await productCollection.find(query).toArray();
       res.status(200).send(data);
     });
